@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>News Search App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/journal/bootstrap.min.css">
+    <!-- Link to jQuery CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="text-center nytimesh1">
+            <span class="fa fa-newspaper-o"></span> News Search App</h1>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span class="fa fa-newspaper-o"></span> Search Parameters
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <b>Search Term:</b>
+                    </p>
+                    <div class="form-group">
+                        <input type="text" id="search-term" class="form-control" placeholder="ex: Apple"
+                               aria-describedby="basic-addon1">
+                    </div>
+                    <p>
+                        <b>Number of Records to Retrieve</b>
+                    </p>
+                    <div class="form-group">
+                        <input type="text" id="number-records" class="form-control" placeholder="ex: 10"
+                               aria-describedby="basic-addon1">
+                    </div>
+                    <p>
+                        <b>Start Date (Optional)</b>
+                    </p>
+                    <div class="form-group">
+                        <input type="text" id="start-year" class="form-control" placeholder="ex: 2019-02-14"
+                               aria-describedby="basic-addon1">
+                    </div>
+                    <p>
+                        <b>End Date (Optional)</b>
+                    </p>
+                    <div class="form-group">
+                        <input type="text" id="end-year" class="form-control" placeholder="ex: 2019-02-14"
+                               aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button id="form-submission" type="button" class="btn btn-default">
+                            <span class="fa fa-search"> </span> Search
+                        </button>
+                    </div>
+                    <button type="button" id="clear_btn" class="btn btn-default">
+                        <span class="fa fa-trash-o"> </span> Clear
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="fa fa-newspaper-o"></span> Top Articles
+                        </div>
+                        <div class="panel-body" id="top-articles">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end of container -->
+    </div>
+    <style>
+        .resultBox {
+            padding: 20px 10px;
+            width: 100%;
+            margin: 10px;
+            background: #ddd;
+        }
+
+        .resultTitle {
+            font-size: 30px;
+        }
+
+        .resultNumber {
+            padding: 10px;
+            color: white;
+            background: black;
+            border-radius: 5px;
+        }
+
+        .jumbotron {
+            background-color: #000080;
+        }
+
+        .nytimesh1 {
+            color: white !important;
+        }
+    </style>
+</div>
+</body>
+
+</html>
+
+<script>
+    application = {
+
+        makeAJAXCall: function () {
+            var apiKey = "d513c198d4f2470d8820ef138c0f920f";
+            var searchTerm = $('#search-term').val();
+            var recRecords = $('#number-records').val();
+            var startYear = $('#start-year').val();
+            var endYear = $('#end-year').val();
+            var queryURL = "https://newsapi.org/v2/everything?apiKey=" + apiKey + "&q=" + searchTerm  + "&from=" + startYear + "&to=" + endYear + "&sortBy=relevancy&sources=the-wall-street-journal,the-new-york-times,financial-times";
+            $.ajax({url: queryURL, method: 'GET'})
+                .done(function(response) {
+                    var arrayOfArticles = response.articles;
+                    console.log(arrayOfArticles);
+
+                    for (var i = 0; i < Math.min(arrayOfArticles.length, recRecords); i++) {
+                        var $newDiv = $('<div class="resultBox">');
+                        var $title = $('<h2 class="resultTitle">').html(arrayOfArticles[i].title);
+                        var $sectionName = $("<p>").html(arrayOfArticles[i].description);
+                        var $webURL = $("<a>").html(arrayOfArticles[i].url);
+                        var $pubDate = $("<p>").html(arrayOfArticles[i].publishedAt);
+                        $newDiv.append($title, $sectionName, $webURL, $pubDate);
+                        $("#top-articles").append($newDiv);
+                    }
+
+                });
+        },
+
+        eventHandlers: {
+
+            clickFormSubmission: function() {
+                $('#form-submission').on('click', application.makeAJAXCall);
+            }
+        },
+    };
+
+    $(document).ready(function() {
+
+        function setUpEventHandlers() {
+            application.eventHandlers.clickFormSubmission();
+        }
+
+
+        setUpEventHandlers();
+    });
+
+    $("#clear_btn").click(function(){
+        $("#top-articles").empty();
+    });
+
+</script>
